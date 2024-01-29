@@ -19,7 +19,7 @@ REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Ad
 
 :: 任务栏搜索，仅显示图标
 echo "任务栏搜索，仅显示图标"
-REG ADD "HKEY_USERS\DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
+REG ADD "HKEY_USERS\.DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
 
 
 :: 隐藏任务栏上的人脉
