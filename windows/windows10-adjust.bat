@@ -32,6 +32,12 @@ REG ADD "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer" /v Hide
 echo "任务栏时间显示秒"
 REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSecondsInSystemClock /t REG_DWORD /d 1 /f
 
+:: 注意：【将用户账号控制程序（UAC）调整为:从不通知】  和  【取消 内置管理员帐户的管理员批准模式】 只能二选一
+:: 如果开启了其中一个，另一个就会失效。
+:: UAC 必须是 开启内置管理员帐户的管理员批准模式 后，才会生效。
+:: 【取消 内置管理员帐户的管理员批准模式】 后，会自动禁用掉UAC机制，所以你选什么UAC就没用了，如果你在【取消批准模式】后，又调整了UAC，那么UAC就会生效，批准模式就会自动开启。
+:: 建议：使用【取消 内置管理员帐户的管理员批准模式】。因为应用程序弹窗授权，估计你也没有拒绝的时候，拒绝了，应用程序就拒绝运行了
+
 :: 将用户账号控制程序（UAC）调整为:从不通知
 ::REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f
 ::REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 0 /f
