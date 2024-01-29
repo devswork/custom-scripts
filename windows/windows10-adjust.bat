@@ -186,6 +186,9 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance" 
 :: 关闭系统还原功能（没什么用）
 echo "关闭系统还原功能"
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" /v DisableSR /t REG_DWORD /d 1 /f
+echo "禁用Windows 备份服务（Diagnostic Policy Service）"
+sc stop "SDRSVC"
+sc config "SDRSVC" start= disabled
 
 :: 禁用客户体验改善计划（用户信息收集）
 echo "禁用客户体验改善计划"
@@ -231,23 +234,23 @@ echo "禁用账号登录日志报告"
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v ReportBootOk /t REG_SZ /d "0" /f
 
 
-:: 程序兼容性助手服务改为手动启动
-echo "程序兼容性助手服务改为手动启动"
+:: 程序兼容性助手服务改为手动启动（Program Compatibility Assistant Service）
+echo "程序兼容性助手服务改为手动启动（Program Compatibility Assistant Service）"
 sc stop "PcaSvc"
 sc config "PcaSvc" start= demand
 
-:: 禁用远程修改注册表服务
-echo "禁用远程修改注册表服务"
+:: 禁用远程修改注册表服务（Remote Registry）
+echo "禁用远程修改注册表服务（Remote Registry）"
 sc stop "RemoteRegistry"
 sc config "RemoteRegistry" start= disabled
 
-:: 禁用诊断服务
-echo "禁用诊断服务"
+:: 禁用诊断服务（Diagnostic Policy Service）
+echo "禁用诊断服务（Diagnostic Policy Service）"
 sc stop "DPS"
 sc config "DPS" start= disabled
 
-:: 禁用错误报告服务
-echo "禁用错误报告服务"
+:: 禁用错误报告服务（Windows Error Reporting Service）
+echo "禁用错误报告服务（Windows Error Reporting Service）"
 sc stop "WerSvc"
 sc config "WerSvc" start= disabled
 
