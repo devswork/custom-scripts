@@ -1,4 +1,13 @@
 @echo off
+
+echo "****此脚本运行完成后，需要重启计算机****"
+echo "****此脚本运行完成后，需要重启计算机****"
+echo "****此脚本运行完成后，需要重启计算机****"
+echo ""
+echo ""
+echo ""
+
+
 :: 关闭休眠文件和快速启动（新版windows用休眠代替关机实现快速启动，这里可以取消掉这个特性，恢复正常的关机）
 echo "关闭休眠文件和快速启动"
 powercfg /h off
@@ -259,5 +268,25 @@ sc config "DPS" start= disabled
 echo "禁用错误报告服务（Windows Error Reporting Service）"
 sc stop "WerSvc"
 sc config "WerSvc" start= disabled
+
+
+
+echo ""
+echo ""
+echo ""
+echo "****此脚本运行完成后，需要重启计算机****"
+echo "****此脚本运行完成后，需要重启计算机****"
+echo "****此脚本运行完成后，需要重启计算机****"
+
+echo "***********************************"
+echo "注意："
+echo "如果看到很多以下错误："
+echo "【[SC] ControlService 失败 1062】"
+echo "【操作尚未成功】"
+echo "【错误: 拒绝访问。】"
+echo "【错误: 系统找不到指定的注册表项或值。】"
+echo "不用管！不用管！不用管！"
+echo "因为很多注册表和服务已经被脚本处理过、服务已经停止运行了，这个时候出现上述文本就是正常的。"
+echo "接下来重启就行了"
 
 pause
