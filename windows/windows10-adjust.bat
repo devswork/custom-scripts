@@ -54,7 +54,7 @@ REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Ad
 
 :: 取消 内置管理员帐户的管理员批准模式，当前用户不需要确认即可提权
 echo "取消 内置管理员帐户的管理员批准模式"
-REG DELETE "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v FilterAdministratorToken /f
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v FilterAdministratorToken /t REG_DWORD /d 0 /f
 
 
 :: 关闭Smartscreen应用筛选器
@@ -176,6 +176,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MRT" /v DontOfferThrough
 :: Windows 更新更改为:手动更新
 echo "Windows 更新更改为:手动更新"
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v AUOptions /t REG_DWORD /d 1 /f
 
 :: widows 更新中功能更新延迟30天
 echo "widows 更新中功能更新延迟30天"
