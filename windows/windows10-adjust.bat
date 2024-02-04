@@ -1,3 +1,6 @@
+:: 声明使用 UTF-8 编码
+chcp 65001
+
 @echo off
 
 echo "此脚本运行完成后，需要重启计算机"
@@ -236,6 +239,12 @@ echo ""
 :: 关闭远程协助。这功能没什么用，如果远程，肯定用QQ远程协助，或者 TeamViewer、向日葵、todesk 之类的
 echo "关闭远程协助"
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance" /v fAllowToGetHelp /t REG_DWORD /d 0 /f
+
+
+
+:: 提升帧率，还需要：
+:: 组策略 > 计算机配置 -> 管理模板 -> Windows 组件 -> 远程桌面服务 -> 远程桌面会话主机 -> 远程会话环境 。
+:: 【将硬件图形适配器应用于所有远程桌面服务会话】和【配置远程桌面连接的 H.264/AVC 硬件编码】设为【启用】
 
 echo ""
 :: 关闭系统还原功能。这功能没什么用，这年头，你用系统还原成功过？
