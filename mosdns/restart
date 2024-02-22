@@ -1,0 +1,22 @@
+#!/bin/bash
+
+MODULE="[mosdns]"
+DIR="/opt/mosdns"
+PROCESS_NAME="mosdns"
+
+cd ${DIR}
+echo "${MODULE}stop..."
+
+PID=$(ps -ef | grep ${DIR}/${PROCESS_NAME} | grep -v 'grep' | awk 'NR==1 {print $1}')
+echo "${MODULE}PID is ${PID}"
+
+if [ ! -z "${PID}" ]; then
+	echo "${MODULE}kill -15 ${PID}"
+	kill -15 ${PID}
+	sleep 2s
+fi
+
+echo "${MODULE}start..."
+nohup ${DIR}/mosdns start -c ${DIR}/config.yaml -d ${DIR} >> ${DIR}/dns.log 2>&1 &
+
+

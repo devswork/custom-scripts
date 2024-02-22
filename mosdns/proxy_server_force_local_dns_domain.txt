@@ -1,0 +1,21 @@
+# 以下域名为代理服务器的域名，强制国内DNS解析，并将ttl设置为1小时，以防止频繁在国内查询这些节点的域名
+
+# 以 domain: 开头，域匹配。e.g: domain:google.com 会匹配自身 google.com，以及其子域名 www.google.com, maps.l.google.com 等。
+# 以 full: 开头，完整匹配。e.g: full:google.com 只会匹配自身。
+# 以 keyword: 开头，关键字匹配。e.g: keyword:google.com 会匹配包含这个字段的域名，如 google.com.hk, www.google.com.hk。
+# 以 regexp: 开头，正则匹配(Golang 标准)。e.g: regexp:.+\.google\.com$。
+
+# 国内可信DOH
+domain:doh.apad.pro
+
+
+# 雷霆
+domain:hahazuishuai.top
+
+# wgetcloud
+domain:wgetapi.com
+
+# 桔子
+keyword:-ounk.com
+
+
