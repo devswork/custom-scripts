@@ -1,0 +1,31 @@
+plugins:
+  # 缓存
+  - tag: "CACHE"
+    type: "cache"
+    args:
+      size: 204800  # 内置内存缓存条数
+      lazy_cache_ttl: 2592000  # lazy cache 生存时间秒。0=禁用， 86400（1天）604800（7天）2592000（30天）
+      #dump_file: "./cache.dump" # 缓存将在 mosdns 被关闭时保存,插件启动时也会自动从该文件载入缓存
+      #dump_interval: 60 #自动保存间隔秒
+      # 警告: 此处mosdns有bug,如果允许dump_file, mosdns在关闭后重新启动,那么所有缓存的cache ttl都会成为1s,并且永远不会刷新
+      # 猜测和 ttl 命令有关
+    
+  # PTR
+  - tag: "REVERSE_LOOKUP"
+    type: "reverse_lookup"
+    args:
+      size: 65535 # 内置缓存大小。默认 65535。
+      ttl: 86400 # 缓存时间。秒。默认 7200 (2h)。应答记录的 TTL 也会被自动修改，限制在该值以下。
+      handle_ptr: true # 是否主动处理/响应 PTR 请求。如果 PTR 的 IP 命中缓存，则生成应答。
+      # 用途举例: 使用网络监视类工具查看网络连接时，开启域名反查功能大概率会看到 IP 对应的
+      # 真实域名(如果程序先请求域名再建立连接，而且域名经过了该插件处理。)
+      
+  # ECS，为国内站点加速   
+  - tag: "ECS_CHINA"
+    type: "ecs_handler"
+    args:
+      forward: true        # 是否转发来自下游的 ecs
+      preset: 114.241.101.101       # 发送预设 ecs.  北京联通ECS
+      send: false           # 是否发送 ecs
+      mask4: 24             # ipv4 掩码。默认 24
+      mask6: 48             # ipv6 掩码。默认 48

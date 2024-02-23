@@ -1,0 +1,149 @@
+log:
+  production: false
+  level: info  # 日志级别 "debug" "info" "warn" "error"
+  file: "./dns.log"
+
+include: 
+  - ./config/plugin_data_set.yaml # 加载数据集
+  - ./config/plugin_doh.yaml # 加载DOH服务器插件
+  - ./config/plugin_other.yaml # 加载其他自定义插件
+
+
+plugins:
+  # 预检处理逻辑链（提前处理掉一些不想应答的请求）
+  - tag: FIRS
+    type: "sequence"
+    args:
+      - matches: qtype 65
+        exec: mark 1
+      - matches: mark 1
+        exec: query_summary "拒绝服务 QType 65 → REJECT 5"
+      - matches: mark 1
+        exec: reject 5
+
+  # 缓存层逻辑链
+  - tag: CACH
+    type: "sequence"
+    args:
+    #   - exec: query_summary "缓存" # 打印请求摘要
+      - exec: $CACHE
+      - matches: has_resp
+        exec: mark 1
+      - matches: mark 1
+        exec: query_summary "缓存命中"
+      - matches: mark 1
+        exec: accept
+
+  # PTR层逻辑链
+  # 目前测试PTR未成功，这个逻辑链不会启用
+  # - tag: _PTR
+  #   type: "sequence"
+  #   args:
+  #     - matches: ptr_ip $PTR_IP_SET
+  #       exec: $REVERSE_LOOKUP
+  #     - matches: has_resp
+  #       exec: mark 1
+  #     - matches: mark 1
+  #       exec: query_summary "PTR 处理"
+  #     - matches: mark 1
+  #       exec: accept
+
+
+  # 通用TTL处理逻辑链
+  - tag: _TTL
+    type: "sequence"
+    args:
+      - matches: has_resp
+        exec: mark 1
+      #- matches: mark 1
+      #  exec: query_summary "TTL延长"
+      - matches: mark 1
+        exec: ttl 60-0
+
+  # 大陆解析逻辑链（会使用ECS_CHINA来加快国内域名速度）
+  - tag: __CN
+    type: "sequence"
+    args:
+      - exec: query_summary "大陆解析"
+      - exec: $ECS_CHINA # 附带ECS
+      - exec: $CHINA_DOH
+      - matches: "!resp_ip $CHINA_IP_SET" # 如果大陆DNS返回了不是国内的IP，则用海外解析一遍
+        exec: mark 1
+      - matches: mark 1
+        exec: query_summary "国际重新解析"
+      - matches: mark 1
+        exec: $REMOTE_DOH
+      - exec: $_TTL
+      - exec: accept
+  
+  # 强制使用大陆DNS解析并修改 TTL 的逻辑链
+  - tag: F_CN
+    type: "sequence"
+    args:
+      - exec: query_summary "大陆特殊解析"
+      - exec: $CHINA_DOH
+      - exec: ttl 3600-0  # 修改TTL
+      - exec: accept
+  
+  # 国际解析逻辑链
+  - tag: __RT
+    type: "sequence"
+    args:
+      - exec: query_summary "国际解析"
+      - exec: $REMOTE_DOH
+      #如果国际DNS无响应，那么使用备用的DNS
+      - matches: "!has_resp"  
+        exec: mark 1
+      - matches: mark 1
+        exec: query_summary "备用兜底"
+      - matches: mark 1
+        exec: $BACKUP_DOH
+      # 如果国际DNS 或 备用DNS返回了国内IP，则用国内解析一遍（为了防止解析出的IP舍近求远）
+      - matches: resp_ip $CHINA_IP_SET 
+        exec: mark 2
+      - matches: mark 2
+        exec: query_summary "大陆重新解析"
+      - matches: mark 2
+        exec: $CHINA_DOH
+      - exec: $_TTL
+      - exec: accept
+
+  # 主逻辑入口      
+  - tag: "MAIN"
+    type: "sequence"
+    args:
+      # 预检处理
+      -  exec: jump FIRS
+      
+      # 处理PTR
+      #- exec: jump PT
+      
+      # 缓存层（经过CC逻辑链下面的逻辑，都会缓存在CC上，如果在CC中命中，就不会执行后面的逻辑链）
+      - exec: jump CACH
+      
+      # IPv4 结果优先（不返回IPv6结果）
+      - exec: prefer_ipv4
+      
+      # 强制使用大陆解析并修改ttl
+      - matches: qname $TTL_DOMAIN_SET
+        exec: jump F_CN # 大陆（TTL）解析
+      
+      # 大陆域名
+      - matches: qname $CHINA_DOMAIN_SET # 国内域名、直连域名
+        exec: jump __CN # 大陆DNS进行解析
+      
+      # 非大陆域名
+      - exec: jump __RT # 国际解析
+      
+      # 最终返回
+      - exec: accept
+
+  # 启动 udp 和 tcp 服务器
+  - type: udp_server
+    args:
+      entry: MAIN
+      listen: ":53"
+  - type: tcp_server
+    args:
+      entry: MAIN
+      listen: ":53"

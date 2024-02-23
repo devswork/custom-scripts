@@ -1,0 +1,39 @@
+# 以下数据集的下载地址
+# https://github.com/pmkol/easymosdns/tree/rules
+
+plugins:
+  # 需要强制修改TTL的域名数据集
+  # 使用时，用 qname $TTL_DOMAIN_SET 来匹配
+  - tag: "TTL_DOMAIN_SET"
+    type: "domain_set"
+    args:
+      files:
+        - "./data/proxy_server_domain_set.txt" # 代理服务器域名，避免频繁DNS查询
+        
+  # 大陆域名数据集
+  # 使用时，用 qname $CHINA_DOMAIN_SET 来匹配
+  - tag: "CHINA_DOMAIN_SET"
+    type: "domain_set"
+    args:
+      exps:
+        - "full:cn" # 所有 .cn 结尾的域名，都是大陆DNS解析
+      files:
+        - "./data/china_domain_list.txt"
+        - "./data/my_direct_domain.txt"
+
+  # 大陆IP数据集
+  # 使用时，用 resp_ip  $CHINA_IP_SET 来匹配
+  - tag: "CHINA_IP_SET"
+    type: "ip_set"
+    args:
+      files:
+        - "./data/china_ip_list.txt"
+ 
+  # PTR IP数据集
+  # 用于反向IP查找域名用的
+  - tag: "PTR_IP_SET"
+    type: "ip_set"
+    args:
+      files:
+        - "./data/ptr.txt"
+        
