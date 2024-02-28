@@ -1,0 +1,24 @@
+Reference document, and Key:
+https://gist.github.com/jerodg/502bd80a715347662e79af526c98f187
+ Win10 / 11 Pro   W269N-WFGWX-YVC9B-4J6C9-T83GX
+ 
+::  Win Active commands
+slmgr /ipk W269N-WFGWX-YVC9B-4J6C9-T83GX
+slmgr /skms 10.10.100.2
+slmgr /ato
+
+
+Key:
+https://gist.github.com/jerodg/502bd80a715347662e79af526c98f187#office-2021
+Office LTSC Standard 2021   KDX7X-BNVR8-TXXGX-4Q7Y8-78VT3  
+
+:: Office 16
+cd "C:\Program Files\Microsoft Office\Office16"
+cscript ospp.vbs /inpkey:KDX7X-BNVR8-TXXGX-4Q7Y8-78VT3
+cscript ospp.vbs /sethst:10.10.100.2
+cscript ospp.vbs /act
+
+:: Optionally: Check current status
+cscript ospp.vbs /dstatusall
+
+

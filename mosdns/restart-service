@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DIR="/opt/mosdns"
+
+
+cd ${DIR}
+
+echo "${MODULE} restart..."
+#cat /dev/null > ${DIR}/dns.log
+./mosdns service stop
+#echo "--------------------------------" >> ${DIR}/dns.log
+./mosdns service start
+
+
