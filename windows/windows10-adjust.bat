@@ -4,8 +4,8 @@ chcp 65001
 @echo off
 
 echo "此脚本运行完成后，需要重启计算机"
-echo "本脚本不会破坏任何计算机的组件，仅仅是修改操作系统各项设置保存在注册表的值，每当重新启动后，系统就会从注册表中读取并加载为系统中的设置，这也是为什么修改后需要重启"
-echo "REG ADD命令不仅仅是添加注册表项，如果注册表已经存在，就相当于UPDATE，不要被 ADD 迷惑了"
+echo "本脚本不会破坏任何计算机的组件，仅修改系统设置的注册表"
+echo "REG ADD命令不仅是添加注册表项，如果注册表已经存在，就相当于UPDATE"
 
 echo ""
 :: 关闭休眠文件和快速启动。新版windows用休眠代替关机实现快速启动，这里可以取消掉这个特性，恢复正常的关机。别被快速启动四个字唬住了，很多时候内存溢出或者莫名占用很高却找不到谁占用了，就是因为这个特性
@@ -346,6 +346,9 @@ REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartNameResolution" /t REG_DWORD /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartProtocolReordering" /t REG_DWORD /d 1 /f
 
+:: win11使用经典的右键菜单
+REG ADD "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+:: 恢复新版菜单 REG DELETE "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" /f
 
 echo ""
 echo ""
