@@ -77,6 +77,15 @@ REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v Enabl
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v SmartScreenEnabled /t REG_SZ /d "off" /f
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" /v EnabledV9 /t REG_DWORD /d 0 /f
 
+:: 关闭win11智能应用控制
+REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f
+
+:: 关闭win11内核隔离
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 0 /f
+
+:: 关闭win11内存隔离
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 0 /f
+
 
 echo ""
 :: 关闭打开程序的“安全警告”。远离打开exe时的警告。
@@ -247,7 +256,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance" 
 :: 【将硬件图形适配器应用于所有远程桌面服务会话】和【配置远程桌面连接的 H.264/AVC 硬件编码】设为【启用】
 
 echo ""
-:: 关闭系统还原功能。这功能没什么用，这年头，你用系统还原成功过？
+:: 关闭系统还原功能。这功能没什么用
 echo "关闭系统还原功能"
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" /v DisableSR /t REG_DWORD /d 1 /f
 echo "禁用Windows 备份服务（Diagnostic Policy Service）"
@@ -332,23 +341,18 @@ echo "禁用错误报告服务（Windows Error Reporting Service）"
 sc stop "WerSvc"
 sc config "WerSvc" start= disabled
 
+:: 禁用DNS多网卡并行解析
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "EnableMulticast" /t REG_DWORD /d 0 /f
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartNameResolution" /t REG_DWORD /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartProtocolReordering" /t REG_DWORD /d 1 /f
 
 
 echo ""
 echo ""
 echo ""
 echo "***********************************"
-echo "此脚本运行完成后，需要重启计算机"
+echo "RESTART REQUIRED"
 echo "***********************************"
-echo "注意："
-echo "如果看到很多以下错误："
-echo "【[SC] ControlService 失败 1062】"
-echo "【操作尚未成功】"
-echo "【错误: 拒绝访问。】"
-echo "【错误: 系统找不到指定的注册表项或值。】"
-echo "不用管！不用管！不用管！"
-echo "因为很多注册表已经被修改、服务已经处于停止运行状态，这个时候出现上述文本就是正常的"
-echo "接下来重启就行了"
-echo "***********************************"
+
 
 pause
