@@ -193,6 +193,7 @@ PID=$(ps -ef | grep ${RUNNER} | grep -v 'grep' | awk 'NR==1 {print $2}')
 if [ -n "$PID" ]; then
     kill -15 ${PID}
     echo "成功停止 ${PID}"
+    cat /dev/null > ${LOG}
 else
     echo "没有运行 mihomo"
 fi
