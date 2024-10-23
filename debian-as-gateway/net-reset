@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+
+# 删除旧的路由规则
+ip rule del fwmark 666 table 666 || true
+ip route del local 0.0.0.0/0 dev lo table 666 || true
+
+# 清空和删除 NAT 表中的规则和用户定义的链
+iptables -t nat -F
+iptables -t nat -X
+
+# 清空和删除 Mangle 表中的规则和特定链
+iptables -t mangle -F
+iptables -t mangle -X clash || true
+iptables -t mangle -X clash_local || true
+echo "iptables已重置!"
+

@@ -1,0 +1,59 @@
+#!/usr/bin/bash
+TPROXY_PORT=7895
+
+echo "配置路由规则和iptables规则..."
+# 创建路由规则，标记为 666 的流量使用 666 号路由表
+ip rule add fwmark 666 lookup 666
+# 在 666 号路由表中添加一条路由，将所有流量路由到本地回环接口
+ip route add local 0.0.0.0/0 dev lo table 666
+
+# 在 mangle 表中创建一个新的链 clash，用于处理流量标记和修改
+iptables -t mangle -N clash
+
+# 对于目标地址为局域网或保留地址的流量，直接返回，不做处理
+iptables -t mangle -A clash -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A clash -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A clash -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A clash -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A clash -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A clash -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A clash -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A clash -d 240.0.0.0/4 -j RETURN
+
+# 将所有其他 TCP 和 UDP 流量重定向到 ${TPROXY_PORT} 端口，并打上标记 666
+iptables -t mangle -A clash -p tcp -j TPROXY --on-port ${TPROXY_PORT} --tproxy-mark 666
+iptables -t mangle -A clash -p udp -j TPROXY --on-port ${TPROXY_PORT} --tproxy-mark 666
+
+# 将进入的所有流量通过 clash 链进行处理
+iptables -t mangle -A PREROUTING -j clash
+
+# 创建 clash_local 链，用于处理本机发出的流量
+iptables -t mangle -N clash_local
+
+# 对于本机发出的到内网或保留地址的流量，直接返回，不做处理
+iptables -t mangle -A clash_local -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A clash_local -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A clash_local -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A clash_local -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A clash_local -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A clash_local -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A clash_local -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A clash_local -d 240.0.0.0/4 -j RETURN
+
+# 为本机发出的所有 TCP 和 UDP 流量打上标记 666
+iptables -t mangle -A clash_local -p tcp -j MARK --set-mark 666
+iptables -t mangle -A clash_local -p udp -j MARK --set-mark 666
+
+# 对于由 clash 用户发出的流量，直接返回，以防止流量循环
+# iptables -t mangle -A OUTPUT -p tcp -m owner --uid-owner clash -j RETURN
+# iptables -t mangle -A OUTPUT -p udp -m owner --uid-owner clash -j RETURN
+
+# 将本机发出的流量通过 clash_local 链进行处理
+iptables -t mangle -A OUTPUT -j clash_local
+
+# 允许本地网络路由( sysctl -w 临时修改 Linux 内核参数)
+#sysctl -w net.ipv4.conf.all.route_localnet=1
+# 将 ICMP（ping）请求的目标地址重定向到本地，以便返回结果
+#iptables -t nat -A PREROUTING -p icmp -d 192.168.0.0/16 -j DNAT --to-destination 127.0.0.1
+
+echo "路由规则、iptables规则已完成配置！"

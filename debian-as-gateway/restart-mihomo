@@ -1,0 +1,30 @@
+#!/usr/bin/bash
+DIR="/opt/mihomo"
+CORE="mihomo-linux-amd64"
+RUNNER=${DIR}/${CORE}
+LOG=${DIR}/log.log
+YML=remix-all.yaml  #【注意】指定使用哪个 mihomo 配置
+
+cd ${DIR}
+
+echo "停止 ${RUNNER}"
+PID=$(ps -ef | grep ${RUNNER} | grep -v 'grep' | awk 'NR==1 {print $2}')
+if [ -n "$PID" ]; then
+    kill -15 ${PID}
+    echo "成功停止 ${PID}"
+else
+    echo "没有运行 mihomo"
+fi
+
+sleep 1
+echo "重置 iptables 规则..."
+${NET_RESET}
+
+sleep 1
+echo "设置 iptables 规则..."
+${NET_SET}
+
+sleep 1
+echo "启动 mihomo ..."
+nohup ${RUNNER} -d ${DIR} -f ${DIR}/${YML} >> ${LOG} 2>&1 &
+echo "mihomo 启动完毕,日志 ${LOG}"
